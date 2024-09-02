@@ -1,0 +1,230 @@
+openapi: "3.0.0"
+info:
+  title: "Football Match Management API"
+  description: "API for managing football competitions, teams, and players."
+  version: "1.0.0"
+
+paths:
+  /competitions:
+    post:
+      summary: "Create a new competition"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionWithoudId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+
+    get:
+      summary: "Get a list of competitions"
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+
+  /teams:
+    post:
+      summary: "Create a new team"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+             $ref: '#/components/schemas/CreatedTeam'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+    get:
+      summary: "Get a list of teams"
+      parameters:
+        - name: teamName
+          in: query
+          description: "Filter teams by name"
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamDetails'
+
+  /teams/{teamId}/players:
+    get:
+      summary: "Get a list of players for a specific team"
+      parameters:
+        - name: playerName
+          in: query
+          description: "Filter players by name"
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: teamId
+          in: path
+          required: true
+          description: "ID of the team to get players for"
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerDetails'
+
+  /players:
+    post:
+      summary: "Create a new player"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatedPlayer'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Unique identifier for the competition"
+        name:
+          type: string
+        location:
+          type: string
+          
+    CompetitionWithoudId:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+              
+    CreatedTeam:
+      type: object
+      properties:
+        name:
+          type: string
+        slogan:
+          type: string
+              
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Unique identifier for the team"
+        name:
+          type: string
+        slogan:
+          type: string
+
+    TeamDetails:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            competitions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Competition'
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/Player'
+                
+    CreatedPlayer:
+      type: object
+      properties:
+        name:
+          type: string
+        number:
+          type: integer
+        preferredFoot:
+          type: string
+          enum:
+            - left
+            - right
+              
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Unique identifier for the player"
+        name:
+          type: string
+        number:
+          type: integer
+        preferredFoot:
+          type: string
+          enum:
+            - left
+            - right
+
+    PlayerDetails:
+      allOf:
+        - $ref: '#/components/schemas/Player'
+        - type: object
+          properties:
+            team:
+              type: integer
+              description: "Team ID"
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: true
+      schema:
+        type: integer
+
+
+    PageSize:
+      name: pageSize
+      in: query
+      required: true
+      schema:
+        type: integer
+
